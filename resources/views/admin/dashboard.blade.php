@@ -63,48 +63,6 @@
     </section>
 
 </div>
-<script>
-    //update role
-    function updateRole(id) {
-        $.ajax({
-            url: "dashboard/updateRole/" + id,
-            type: "put",
-            dataType: 'JSON',
-            success: function(data) {
-                if (data.status = 200) {
-                    location.reload();
-                }
-            }
-        });
-    }
-    //delete data
-    function deleteData(id) {
 
-        swal("Are you sure you want to delete this book", {
-            dangerMode: true,
-            buttons: true,
-            icon: "warning",
-        }).then(function(isConfirm) {
-
-            if (isConfirm) {
-
-                $.ajax({
-                    url: "dashboard/delete/" + id,
-                    type: "delete",
-                    dataType: 'JSON',
-                    success: function(data) {
-                        if (data.status = 200) {
-                            location.reload();
-                        }
-                    }
-                });
-            }
-        });
-    }
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-</script>
+@include('layouts.footer')
 

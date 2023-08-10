@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 
@@ -19,13 +17,11 @@ class DashboardController extends Controller
             return redirect('login');
         } else {
             if (Auth::user()->role == 'admin') {
-                Log::info('admin');
                 $users = User::where('role', '!=', 'admin')->get();
                 return view('admin.dashboard', [
                     'users' => $users,
                 ]);
             } else {
-                Log::info('user');
                 $user = User::where(['id' => Auth::user()->id])->first();
                 return view('user.dashboard', ['user' => $user]);
             }
@@ -37,7 +33,7 @@ class DashboardController extends Controller
         if (isset($id) && $id != null && is_numeric($id)) {
             return User::where('id', $id)->first();
         } else {
-            return redirect()->route('user');
+            return redirect('dashboard');
         }
     }
 
@@ -72,7 +68,7 @@ class DashboardController extends Controller
                 'status' => 200,
             ]);
         } else {
-            return redirect()->route('user');
+            return redirect('dashboard');
         }
     }
 
@@ -87,7 +83,7 @@ class DashboardController extends Controller
                 'status' => 200,
             ]);
         } else {
-            return redirect()->route('admin');
+            return redirect('dashboard');
         }
     }
     public function updateUserRole(Request $request, $id): JsonResponse
@@ -101,7 +97,7 @@ class DashboardController extends Controller
                 'status' => 200,
             ]);
         } else {
-            return redirect()->route('admin');
+            return redirect('dashboard');
         }
     }
 }

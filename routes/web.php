@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\DashboardController;
-use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,19 +21,16 @@ Route::get('/', function () {
 });
 
 Auth::routes(['verify' => true]);
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [
+    App\Http\Controllers\HomeController::class,
+    'index',
+])->name('home');
 
-Route::controller(RegisterController::class)->group(function () {
-    Route::post('/register', 'store');
-});
-Route::controller(LoginController::class)->group(function () {
-    Route::post('/login', 'login');
-});
+Route::post('/register', [RegisterController::class, 'store']);
+Route::post('/login', [LoginController::class, 'login']);
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::controller(LoginController::class)->group(function () {
-        Route::get('/logout', 'logout');
-    });
+    Route::get('/logout', [LoginController::class, 'logout']);
     Route::group(['prefix' => 'dashboard'], function () {
         Route::controller(DashboardController::class)->group(function () {
             Route::get('/', 'index');

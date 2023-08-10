@@ -50,7 +50,7 @@
                     </tr>
                     <tr>
                         <th><strong>image</strong></th>
-                        <td><img src="{{ asset(env('DO_IMAGE') . $user->image) }}" height="40" width="40"></td>
+                        <td><img src="{{ asset(env('DO_IMAGE') . $user->image) }}" height="100" width="100"></td>
                     </tr>
                     <tr>
                         <th><strong>Action</strong></th>
@@ -69,7 +69,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title"> edit profile </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" onclick="resetError()" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="d-flex justify-content-center">
@@ -115,7 +116,8 @@
 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-success" id="save">Update</button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary closeBtn"
+                                    data-bs-dismiss="modal">Close</button>
                             </div>
                         </form>
                     </div>
@@ -125,120 +127,5 @@
     </section>
 
 </div>
-<script>
-    function setImage(event) {
 
-        var preview = document.getElementById('image');
-        var image = URL.createObjectURL(event.target.files[0]);
-        preview.src = image;
-        preview.height = "200";
-        preview.width = "200"
-    }
-
-    //edit data
-    function editData(id) {
-
-        $.ajax({
-            url: "dashboard/edit/" + id,
-            type: "get",
-            dataType: "json",
-            success: function(data) {
-
-                console.log(data);
-                var editId = $('#editid').val(data.id);
-
-                if (editId) {
-
-                    $('#firstName').val(data.first_name);
-                    $('#lastName').val(data.last_name);
-                    var image = document.getElementById('image');
-                    let imageUrl = "{{ env('DO_IMAGE') }}";
-                    image.src = imageUrl + data.image;
-                    $("#edit").modal('show');
-                }
-            }
-        });
-    }
-
-    // update data :
-    $(document).on('click', '#save', function(e) {
-
-        e.preventDefault();
-        if ($("#ModalData").valid() == false) {
-            return false;
-        }
-
-        var userData = new FormData();
-        var id = $('#editid').val();
-        userData.append('firstName', $('input[name=firstName]').val());
-        userData.append('lastName', $('input[name=lastName]').val());
-        userData.append('image', $('input[type="file"]')[0].files[0]);
-
-        $.ajax({
-            url: "dashboard/update/" + id,
-            type: "post",
-            dataType: 'json',
-            data: userData,
-            contentType: false,
-            processData: false,
-            success: function(data) {
-
-                if (data.status == 200) {
-                    location.reload();
-                }
-            },
-            error: function(response) {
-                $.each(response.responseJSON.errors, function(field_name, error) {
-                    $('#' + field_name + '_error').text(error);
-
-                })
-            }
-        });
-
-    });
-
-    $(document).ready(function() {
-
-        // jquery validation for update modal
-        jQuery.validator.addMethod("alpha", function(value, element) {
-            return this.optional(element) || /^[A-Za-z ]+$/.test(value)
-        });
-
-        var validator = $("#ModalData").validate({
-
-            rules: {
-                firstName: {
-                    required: true,
-                    alpha: true
-                },
-                lastName: {
-                    required: true,
-                    alpha: true
-
-                },
-                image_file: {
-                    required: true
-                }
-            },
-            messages: {
-                firstName: {
-                    required: "Enter first name",
-                    alpha: "Only alphabets allowed",
-                },
-                lastName: {
-                    required: "Enter last name",
-                    alpha: "Only alphabets allowed",
-                },
-                image_file: {
-                    required: "select profile avatar"
-                }
-            },
-        });
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-    });
-</script>
+@include('layouts.footer')

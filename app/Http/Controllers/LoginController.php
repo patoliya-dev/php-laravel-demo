@@ -25,8 +25,7 @@ class LoginController extends Controller
                 'password' => $request->password,
             ])
         ) {
-            $email = User::where('email', $request->email)->first();
-            return redirect('dashboard');
+            return redirect('dashboard')->with('message','login successfully');
         } else {
             return back()
                 ->withErrors([

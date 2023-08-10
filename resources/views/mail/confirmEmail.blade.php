@@ -1,16 +1,26 @@
 @include('layouts.header')
 
 
-<div class="container h-100 design">
+<div class="container h-100">
     <section>
         <div class="row">
-            <div class="col-md-6">
-                <h1>hello </h1>
-                <h4>Mr./Ms. {{ $data->first_name }} </h4>
-                <p> your are  successfully registered </p>
-
-                <a class="btn btn-primary" href="{{ env('APP_URL') . 'login' }}"> login </a>
+            <div class="col-md-6 emailDesign">
+                <h4>Hello {{ $data->first_name }} </h4>
+                <p> Your Are Successfully Registered </p>
+                <p>We’d like to confirm that your account was created successfully. To access this app click the Button
+                    below.</p>
+                <a class="btn btn-primary mb-3" href="{{ env('APP_URL') . 'login' }}"> login </a>
+                <p>Best,<br>
+                    laravel-dev
+                </p>
             </div>
         </div>
     </section>
 </div>
+<style>
+    .emailDesign {
+        padding: 30px;
+        border: 1px solid black;
+        margin: 50px;
+    }
+</style>
