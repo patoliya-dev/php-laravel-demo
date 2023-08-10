@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\user;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -11,16 +11,24 @@ use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 
-
 class DashboardController extends Controller
 {
     public function index()
     {
-        if (!session()->has('email')) {
+        if (!Auth::user()) {
             return redirect('login');
         } else {
-            $user = User::where('id', Auth::user()->id)->first();
-            return view('user.dashboard', ['user' => $user]);
+            if (Auth::user()->role == 'admin') {
+                Log::info('admin');
+                $users = User::where('role', '!=', 'admin')->get();
+                return view('admin.dashboard', [
+                    'users' => $users,
+                ]);
+            } else {
+                Log::info('user');
+                $user = User::where(['id' => Auth::user()->id])->first();
+                return view('user.dashboard', ['user' => $user]);
+            }
         }
     }
 
@@ -29,7 +37,7 @@ class DashboardController extends Controller
         if (isset($id) && $id != null && is_numeric($id)) {
             return User::where('id', $id)->first();
         } else {
-            return redirect('user-dashboard');
+            return redirect()->route('user');
         }
     }
 
@@ -64,7 +72,36 @@ class DashboardController extends Controller
                 'status' => 200,
             ]);
         } else {
-            return redirect('user-dashboard');
+            return redirect()->route('user');
+        }
+    }
+
+    public function userDelete(Request $request, $id): JsonResponse
+    {
+        if (isset($id) && $id != null && is_numeric($id)) {
+            $delete = User::find($id)->delete();
+            $request
+                ->session()
+                ->flash('message', 'Record deleted Successfully');
+            return response()->json([
+                'status' => 200,
+            ]);
+        } else {
+            return redirect()->route('admin');
+        }
+    }
+    public function updateUserRole(Request $request, $id): JsonResponse
+    {
+        if (isset($id) && $id != null && is_numeric($id)) {
+            $delete = User::find($id)->update(['role' => 'admin']);
+            $request
+                ->session()
+                ->flash('message', 'user promoted to admin Successfully');
+            return response()->json([
+                'status' => 200,
+            ]);
+        } else {
+            return redirect()->route('admin');
         }
     }
 }

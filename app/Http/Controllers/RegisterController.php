@@ -1,55 +1,35 @@
 <?php
 
-namespace App\Http\Controllers\user;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-// use Illuminate\Support\Facades\Crypt;
-// use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ConfirmEmail;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        return view('user.register');
-    }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        // regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/|min:8|max:16'
 
         $request->validate(
             [
                 'firstName' => 'required|regex:/^[a-zA-Z ]*$/',
                 'lastName' => 'required|regex:/^[a-zA-Z ]*$/',
                 'email' => 'required|email|unique:users,email',
-                'Password' => 'required',
+                'Password' => 'required|min:8',
                 'image_file' => 'required|image|max:1024',
             ],
             [
                 'email.unique' => 'Email is already exist',
-                'Password.regex' =>
-                    'One small,capital,digit and special charachter required',
             ]
         );
-
 
         // $path = $request->file('image_file')->storePublicly('data/demo', 'do');
         // $url = Storage::disk('do')->url($path);
@@ -65,8 +45,9 @@ class RegisterController extends Controller
             'password' => hash::make($request->Password),
             'image' => $path ?? null,
             'role' => 'user',
+            'token' => Str::random(60),
         ]);
 
-        return redirect('login');
+        Mail::to($create->email)->send(new ConfirmEmail($create));
     }
 }

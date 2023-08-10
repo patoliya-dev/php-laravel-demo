@@ -5,7 +5,7 @@
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">welcome to : <b> {{ session()->get('email') }} </b></a>
+                <a class="navbar-brand" href="#">welcome to : <b> {{ Auth::user()->email }} </b></a>
             </div>
         </nav>
 
@@ -29,29 +29,36 @@
 
         <div class="table-responsive">
             <table class="table table-striped table-hover table-condensed">
+                <h4 class="pb-3">User Profile</h4>
                 <thead>
                     <tr>
                         <th><strong>id</strong></th>
-                        <th><strong>first name</strong></th>
-                        <th><strong>last name</strong></th>
-                        <th><strong>email</strong></th>
-                        <th><strong>image</strong></th>
-                        <th><strong>Action</strong></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
                         <td>{{ $user->id }}</td>
+                    </tr>
+                    <tr>
+                        <th><strong>first name</strong></th>
                         <td>{{ $user->first_name }}</td>
+                    </tr>
+
+                    <tr>
+                        <th><strong>last name</strong></th>
                         <td>{{ $user->last_name }}</td>
+                    </tr>
+                    <tr>
+                        <th><strong>email</strong></th>
                         <td>{{ $user->email }}</td>
+                    </tr>
+                    <tr>
+                        <th><strong>image</strong></th>
                         <td><img src="{{ asset(env('DO_IMAGE') . $user->image) }}" height="40" width="40"></td>
+                    </tr>
+                    <tr>
+                        <th><strong>Action</strong></th>
                         <td>
                             <a onclick='editData({{ $user->id }})'><i class="fa-solid fa-pen"></i></a>
-                            {{-- <a href="{{ 'user-dashboard/edit/'. $user->id }}"><i class="fa-solid fa-pen"></i></a> --}}
                         </td>
                     </tr>
-                </tbody>
+                </thead>
             </table>
         </div>
 
@@ -132,7 +139,7 @@
     function editData(id) {
 
         $.ajax({
-            url: "user-dashboard/edit/" + id,
+            url: "dashboard/edit/" + id,
             type: "get",
             dataType: "json",
             success: function(data) {
@@ -168,7 +175,7 @@
         userData.append('image', $('input[type="file"]')[0].files[0]);
 
         $.ajax({
-            url: "user-dashboard/update/" + id,
+            url: "dashboard/update/" + id,
             type: "post",
             dataType: 'json',
             data: userData,
@@ -235,4 +242,3 @@
         });
     });
 </script>
-

@@ -25,6 +25,7 @@ class AdminSeeder extends Seeder
                 'password' => hash::make('admin@123'),
                 'image' => null,
                 'role' => 'admin',
+                'token' => \Illuminate\Support\Str::random(60),
             ]);
     }
 }
