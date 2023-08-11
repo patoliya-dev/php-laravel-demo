@@ -1,91 +1,85 @@
-version: '3.3'
+version: '3'
 services:
-
-    app:
-        container_name: serve
+    web:
         build:
             context: .
             dockerfile: Dockerfile
         command: 'php artisan serve --host=127.0.0.1'
         ports:
-            - 8000:8000
+            - "8080:80"
         volumes:
             - .:/var/www/html/php-laravel-demo
+        depends_on:
+            - db
+            - redis
+            - minio
 
     queue:
         container_name: Queue
         build:
             context: .
             dockerfile: Dockerfile
-        command: 'php artisan queue:work'
+        command: 'php artisan queue:restart && php artisan queue:work'
         depends_on:
             - db
 
     db:
-        image: mysql:latest
-        container_name: Database
-        restart: always
+        image: mysql:5.7
         environment:
-            MYSQL_DATABASE: php_demo_laravel
-            MYSQL_USER: root
-            MYSQL_ROOT: "root"
-            MYSQL_PASSWORD: root
             MYSQL_ROOT_PASSWORD: root
-        volumes:
-            - db:/var/lib/mysql
+            MYSQL_DATABASE: laravel_db
+            MYSQL_USER: root
+            MYSQL_PASSWORD: root
         ports:
-            - 3306:3306
+            - "3366:3366"
+        volumes:
+            - db_data:/var/lib/mysql
 
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
-        container_name: phpmyadmin
         links:
             - db
+        ports:
+            - "8081:80"
         environment:
             PMA_HOST: db
-            PMA_PORT: 3306
-            PMA_ARBITRARY: 1
-        restart: always
-        ports:
-            - 3400:80
-        depends_on:
-            - db
+            MYSQL_ROOT_PASSWORD: root
 
     redis:
         image: redis:latest
-        container_name: app_redis
         ports:
             - "6379:6379"
 
-    s3:
-        image: quay.io/minio/minio:RELEASE.2022-08-13T21-54-44Z
-        container_name: s3_minio
-        command: minio server /data
-        ports:
-            - "9000:9000"
+    minio:
+        image: minio/minio
+        command: server /data --console-address ":9001"
         environment:
+            MINIO_ACCESS_KEY: minioaccesskey
+            MINIO_SECRET_KEY: miniosecretkey
             MINIO_ROOT_USER: minio
             MINIO_ROOT_PASSWORD: minio123
-            MINIO_ACCESS_KEY: minio_access_key
-            MINIO_SECRET_KEY: minio_secret_key
-        restart: always
-
-    mail:
-        hostname: maildev
-        container_name: mail
-        command: bin/maildev --web 1080 --smtp 1025 --mail-directory /home/maildev/data
-        volumes:
-            - ./var/data/maildev:/home/maildev/data
         ports:
-            - "1080:1080"
-            - "1025:1025"
-        networks:
-            - laravel-exa
+            - "9000:9000"
+            - '9001:9001'
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "curl",
+                    "-f",
+                    "http://localhost:9000/minio/health/live"
+                ]
+            interval: 30s
+            timeout: 20s
+            retries: 3
+        volumes:
+            - minio_data:/data
 
-    networks:
-        laravel-exa:
-            driver: bridge
+    maildev:
+        image: maildev/maildev
+        ports:
+            - "8025:1080"
 
-    volumes:
-        db:
-            driver: local
+volumes:
+    db_data:
+    minio_data:
