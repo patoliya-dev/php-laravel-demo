@@ -6,7 +6,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        command: 'php artisan serve --host=127.0.01'
+        command: 'php artisan serve --host=127.0.0.1'
         ports:
             - 8000:8000
         volumes:
@@ -32,7 +32,7 @@ services:
             MYSQL_PASSWORD: root
             MYSQL_ROOT_PASSWORD: root
         volumes:
-            - ./db:/var/lib/mysql
+            - db:/var/lib/mysql
         ports:
             - 3306:3306
 
@@ -59,6 +59,7 @@ services:
 
     s3:
         image: quay.io/minio/minio:RELEASE.2022-08-13T21-54-44Z
+        container_name: s3_minio
         command: minio server /data
         ports:
             - "9000:9000"
@@ -68,3 +69,23 @@ services:
             MINIO_ACCESS_KEY: minio_access_key
             MINIO_SECRET_KEY: minio_secret_key
         restart: always
+
+    mail:
+        hostname: maildev
+        container_name: mail
+        command: bin/maildev --web 1080 --smtp 1025 --mail-directory /home/maildev/data
+        volumes:
+            - ./var/data/maildev:/home/maildev/data
+        ports:
+            - "1080:1080"
+            - "1025:1025"
+        networks:
+            - laravel-exa
+
+    networks:
+        laravel-exa:
+            driver: bridge
+
+    volumes:
+        db:
+            driver: local
