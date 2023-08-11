@@ -24,16 +24,13 @@
             dataType: "json",
             success: function(data) {
 
-                console.log(data);
-                var editId = $('#editid').val(data.id);
-
+                var editId = $('#editid').val(data.user.id);
                 if (editId) {
-
-                    $('#firstName').val(data.first_name);
-                    $('#lastName').val(data.last_name);
+                    $('#firstName').val(data.user.first_name);
+                    $('#lastName').val(data.user.last_name);
                     var image = document.getElementById('image');
                     let imageUrl = "{{ env('DO_IMAGE') }}";
-                    image.src = imageUrl + data.image;
+                    image.src = imageUrl + data.user.image;
                     $("#edit").modal('show');
                 }
             }
@@ -101,9 +98,6 @@
                     alpha: true
 
                 },
-                image_file: {
-                    required: true
-                }
             },
             messages: {
                 firstName: {
@@ -114,9 +108,6 @@
                     required: "Enter last name",
                     alpha: "Only alphabets allowed",
                 },
-                image_file: {
-                    required: "select profile avatar"
-                }
             },
         });
 

@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ConfirmEmail;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request): RedirectResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -25,19 +22,19 @@ class LoginController extends Controller
                 'password' => $request->password,
             ])
         ) {
-            return redirect('dashboard')->with('message','login successfully');
+            return redirect('dashboard')->with('message', 'login successfully');
         } else {
             return back()
                 ->withErrors([
                     'email' =>
-                        'The provided credentials do not match our records.',
+                    'The provided credentials do not match our records.',
                     'password' => 'current password is not valid',
                 ])
                 ->onlyInput('password', 'email');
         }
     }
 
-    public function logout()
+    public function logout(): RedirectResponse
     {
         if (Auth::user()) {
             Auth::logout();

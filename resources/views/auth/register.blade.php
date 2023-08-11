@@ -69,7 +69,7 @@
                                 <div class="col-md-6">
                                     <input id="Password" type="Password"
                                         class="form-control @error('Password') is-invalid @enderror" name="Password"
-                                        required autocomplete="new-password">
+                                        value="{{ old('Password') }}" required autocomplete="Password">
 
                                     @error('Password')
                                         <span class="invalid-feedback" role="alert">
@@ -84,9 +84,13 @@
                                 <label for="image"
                                     class="col-md-4 col-form-label text-md-end">{{ __('image') }}</label>
                                 <div class="col-md-6">
-                                    <input type="file" name="image_file" class="form-control" onchange="setImage(event)">
+                                    <input type="file" name="image_file"
+                                        class="form-control @error('image_file') is-invalid @enderror"
+                                        onchange="setImage(event)">
                                     @error('image_file')
-                                        <div class="error">{{ $message }}</div>
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
                                     @enderror
                                 </div>
                             </div>

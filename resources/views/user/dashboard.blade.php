@@ -73,10 +73,7 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="d-flex justify-content-center">
-                            <img src="" alt="profile picture" id="image" class="rounded-circle image"
-                                height="150px" width="150px">
-                        </div>
+
                         <form action="" method="post" id="ModalData" enctype="multipart/form-data">
                             <input type="hidden" id="editid" name="id" value="">
 
@@ -86,7 +83,7 @@
                                         <label for="">first name</label>
                                         <span class="error">*</span>
                                         <input type="text" name="firstName" id="firstName" class="form-control">
-                                        <span class="back-error"></span>
+                                        <span id="firstName_error" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -97,7 +94,7 @@
                                         <label for="">last name</label>
                                         <span class="error">*</span>
                                         <input type="text" name="lastName" id="lastName" class="form-control">
-                                        <span class="back-error"></span>
+                                        <span id="lastName_error" class="text-danger"></span>
                                     </div>
                                 </div>
                             </div>
@@ -109,9 +106,13 @@
                                         <span class="error">*</span>
                                         <input type="file" name="image_file" id="image_file" class="form-control"
                                             onchange="setImage(event)">
-                                        <span class="back-error"></span>
+                                        <span id="image_error" class="text-danger"></span>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <img src="" alt="profile picture" id="image" class="rounded-circle image"
+                                    height="150px" width="150px">
                             </div>
 
                             <div class="modal-footer">

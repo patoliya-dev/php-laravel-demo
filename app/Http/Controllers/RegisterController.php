@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Mail\ConfirmEmail;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ConfirmEmail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class RegisterController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request) :RedirectResponse
     {
-
         $request->validate(
             [
                 'firstName' => 'required|regex:/^[a-zA-Z ]*$/',
@@ -30,12 +28,7 @@ class RegisterController extends Controller
             ]
         );
 
-        // $path = $request->file('image_file')->storePublicly('data/demo', 'do');
-        // $url = Storage::disk('do')->url($path);
-
-        // Log::info($path);
-        // Log::info($url);
-        // Log::info(Storage::disk('do')->getVisibility('data/demo'));
+        $path = $request->file('image_file')->storePublicly('data/demo', 'do');
 
         $create = User::create([
             'first_name' => $request->firstName,
@@ -48,5 +41,9 @@ class RegisterController extends Controller
         ]);
 
         Mail::to($create->email)->send(new ConfirmEmail($create));
+        return redirect('login')->with(
+            'message',
+            'your verification is in progress.., please check email in your inbox'
+        );
     }
 }

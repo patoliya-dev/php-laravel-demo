@@ -2,36 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        if (!Auth::user()) {
-            return redirect('login');
+
+        if (Auth::user()->role == 'admin') {
+            $users = User::where('role', 'user')->get();
+            return view('admin.dashboard', compact('users'));
         } else {
-            if (Auth::user()->role == 'admin') {
-                $users = User::where('role', '!=', 'admin')->get();
-                return view('admin.dashboard', [
-                    'users' => $users,
-                ]);
-            } else {
-                $user = User::where(['id' => Auth::user()->id])->first();
-                return view('user.dashboard', ['user' => $user]);
-            }
+            $user = User::find(Auth::user()->id);
+            return view('user.dashboard', compact('user'));
         }
     }
 
-    public function edit($id)
+    public function edit($id): JsonResponse
     {
-        if (isset($id) && $id != null && is_numeric($id)) {
-            return User::where('id', $id)->first();
+        if (isset($id) && $id != null) {
+            $user = User::find($id);
+            return Response::json([
+                'user' => $user,
+            ]);
         } else {
             return redirect('dashboard');
         }
@@ -39,32 +37,33 @@ class DashboardController extends Controller
 
     public function update(Request $request, $id): JsonResponse
     {
-        if (isset($id) && $id != null && is_numeric($id)) {
+        if (isset($id) && $id != null) {
+            $image_rule = 'nullable';
+            if ($request->file('image') != null) {
+                $image_rule .= '|image|max:1024';
+            }
             $this->validate($request, [
                 'firstName' => 'required|regex:/^[a-zA-Z ]*$/',
                 'lastName' => 'required|regex:/^[a-zA-Z ]*$/',
-                'image' => 'required|image|max:1024',
+                'image' => $image_rule,
             ]);
 
-            // $path = $request->file('image')->storePublicly('data/demo', 'do');
-            // $url = Storage::disk('do')->url($path);
+            $path = null;
+            if ($request->file('image') != null) {
+                $path = $request->file('image')->storePublicly('data/demo', 'do');
+            }
 
-            // Log::info($path);
-            // Log::info($url);
-            // Log::info(Storage::disk('do')->getVisibility('data/demo'));
-
-            $user = User::where('id', $id)->first();
+            $user = User::find($id);
             $update = $user->update([
-                'first_name' =>
-                    $request->input('firstName') ?? $user->first_name,
+                'first_name' => $request->input('firstName') ?? $user->first_name,
                 'last_name' => $request->input('lastName') ?? $user->last_name,
-                'image' => $path ?? null,
+                'image' => $path ?? $user->image,
             ]);
 
             $request
                 ->session()
                 ->flash('message', 'Record Updated Successfully');
-            return response()->json([
+            return Response::json([
                 'status' => 200,
             ]);
         } else {
@@ -74,12 +73,12 @@ class DashboardController extends Controller
 
     public function userDelete(Request $request, $id): JsonResponse
     {
-        if (isset($id) && $id != null && is_numeric($id)) {
+        if (isset($id) && $id != null) {
             $delete = User::find($id)->delete();
             $request
                 ->session()
                 ->flash('message', 'Record deleted Successfully');
-            return response()->json([
+            return Response::json([
                 'status' => 200,
             ]);
         } else {
@@ -88,12 +87,12 @@ class DashboardController extends Controller
     }
     public function updateUserRole(Request $request, $id): JsonResponse
     {
-        if (isset($id) && $id != null && is_numeric($id)) {
-            $delete = User::find($id)->update(['role' => 'admin']);
+        if (isset($id) && $id != null) {
+            User::find($id)->update(['role' => 'admin']);
             $request
                 ->session()
                 ->flash('message', 'user promoted to admin Successfully');
-            return response()->json([
+            return Response::json([
                 'status' => 200,
             ]);
         } else {
